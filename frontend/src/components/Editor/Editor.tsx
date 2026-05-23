@@ -2,7 +2,11 @@ import { useEffect, useRef, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
 import { useMemoStore } from "../../stores/memoStore";
+
+const lowlight = createLowlight(common);
 
 export default function Editor() {
   const { activeMemo, activeId, updateMemo } = useMemoStore();
@@ -21,7 +25,12 @@ export default function Editor() {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
       Placeholder.configure({
         placeholder: "Start writing...",
       }),

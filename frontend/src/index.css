@@ -180,3 +180,76 @@ body,
   color: var(--color-ink-secondary);
   margin-bottom: var(--spacing-xs);
 }
+
+/* ─── Code Block Syntax Highlighting (lowlight) ─── */
+.tiptap pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.tiptap pre code .hljs-comment,
+.tiptap pre code .hljs-quote {
+  color: #636366;
+  font-style: italic;
+}
+
+.tiptap pre code .hljs-keyword,
+.tiptap pre code .hljs-selector-tag,
+.tiptap pre code .hljs-addition {
+  color: #ff79c6;
+}
+
+.tiptap pre code .hljs-number,
+.tiptap pre code .hljs-string,
+.tiptap pre code .hljs-meta .hljs-meta-string,
+.tiptap pre code .hljs-literal,
+.tiptap pre code .hljs-doctag,
+.tiptap pre code .hljs-regexp {
+  color: #f1fa8c;
+}
+
+.tiptap pre code .hljs-title,
+.tiptap pre code .hljs-section,
+.tiptap pre code .hljs-name,
+.tiptap pre code .hljs-selector-id,
+.tiptap pre code .hljs-selector-class {
+  color: #8be9fd;
+}
+
+.tiptap pre code .hljs-attribute,
+.tiptap pre code .hljs-attr,
+.tiptap pre code .hljs-variable,
+.tiptap pre code .hljs-template-variable,
+.tiptap pre code .hljs-class .hljs-title,
+.tiptap pre code .hljs-type {
+  color: #50fa7b;
+}
+
+.tiptap pre code .hljs-symbol,
+.tiptap pre code .hljs-bullet,
+.tiptap pre code .hljs-subst,
+.tiptap pre code .hljs-meta,
+.tiptap pre code .hljs-meta .hljs-keyword,
+.tiptap pre code .hljs-selector-attr,
+.tiptap pre code .hljs-selector-pseudo,
+.tiptap pre code .hljs-link {
+  color: #bd93f9;
+}
+
+.tiptap pre code .hljs-built_in,
+.tiptap pre code .hljs-deletion {
+  color: #ff5555;
+}
+
+.tiptap pre code .hljs-formula {
+  background: var(--color-canvas-secondary);
+}
+
+.tiptap pre code .hljs-emphasis {
+  font-style: italic;
+}
+
+.tiptap pre code .hljs-strong {
+  font-weight: bold;
+}

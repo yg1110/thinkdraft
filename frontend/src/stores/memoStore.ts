@@ -22,6 +22,8 @@ interface MemoStore {
   createMemo: () => Promise<void>;
   updateMemo: (title?: string, content?: string) => Promise<void>;
   deleteMemo: (id: string) => Promise<void>;
+  selectPrevMemo: () => Promise<void>;
+  selectNextMemo: () => Promise<void>;
 }
 
 export const useMemoStore = create<MemoStore>((set, get) => ({
@@ -75,5 +77,29 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
       set({ activeMemo: null, activeId: null });
     }
     await get().loadMemos();
+  },
+
+  selectPrevMemo: async () => {
+    const { memos, activeId, selectMemo } = get();
+    if (memos.length === 0) return;
+    if (!activeId) {
+      await selectMemo(memos[memos.length - 1].id);
+      return;
+    }
+    const currentIndex = memos.findIndex((m) => m.id === activeId);
+    if (currentIndex <= 0) return;
+    await selectMemo(memos[currentIndex - 1].id);
+  },
+
+  selectNextMemo: async () => {
+    const { memos, activeId, selectMemo } = get();
+    if (memos.length === 0) return;
+    if (!activeId) {
+      await selectMemo(memos[0].id);
+      return;
+    }
+    const currentIndex = memos.findIndex((m) => m.id === activeId);
+    if (currentIndex < 0 || currentIndex >= memos.length - 1) return;
+    await selectMemo(memos[currentIndex + 1].id);
   },
 }));
