@@ -2,6 +2,8 @@ import { useEffect, useCallback, useRef } from "react";
 import Sidebar from "./components/Sidebar/Sidebar";
 import MemoList from "./components/MemoList/MemoList";
 import Editor from "./components/Editor/Editor";
+import DraftEditor from "./components/BlogDraft/DraftEditor";
+import TemplateModal from "./components/BlogDraft/TemplateModal";
 import ResizeHandle from "./components/ResizeHandle/ResizeHandle";
 import CommandPalette from "./components/CommandPalette/CommandPalette";
 import { useUIStore } from "./stores/uiStore";
@@ -15,6 +17,7 @@ export default function App() {
     setMemoListWidth,
     toggleCommandPalette,
     setSidebarCollapsed,
+    activeView,
   } = useUIStore();
   const { createMemo, selectPrevMemo, selectNextMemo } = useMemoStore();
   const prevSidebarOpenRef = useRef(sidebarOpen);
@@ -93,11 +96,18 @@ export default function App() {
     <>
       <div className="flex h-full">
         {sidebarOpen && <Sidebar />}
-        <MemoList width={memoListWidth} />
-        <ResizeHandle onResize={handleResize} />
-        <Editor />
+        {activeView === "memos" ? (
+          <>
+            <MemoList width={memoListWidth} />
+            <ResizeHandle onResize={handleResize} />
+            <Editor />
+          </>
+        ) : (
+          <DraftEditor />
+        )}
       </div>
       <CommandPalette />
+      <TemplateModal />
     </>
   );
 }

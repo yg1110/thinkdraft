@@ -253,3 +253,32 @@ body,
 .tiptap pre code .hljs-strong {
   font-weight: bold;
 }
+
+/* ─── Light theme Tiptap overrides (blog draft editor) ─── */
+.tiptap-light {
+  color: var(--color-ink-on-light);
+}
+
+.tiptap-light p.is-editor-empty:first-child::before {
+  color: #999;
+}
+
+.tiptap-light pre {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.tiptap-light code {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.tiptap-light blockquote {
+  color: #636366;
+}
+
+/* ─── Spinner animation ─── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

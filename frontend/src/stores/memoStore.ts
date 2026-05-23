@@ -15,6 +15,8 @@ interface MemoStore {
   activeId: string | null;
   searchQuery: string;
   loading: boolean;
+  selectedIds: Set<string>;
+  selectMode: boolean;
 
   loadMemos: () => Promise<void>;
   search: (query: string) => Promise<void>;
@@ -24,6 +26,9 @@ interface MemoStore {
   deleteMemo: (id: string) => Promise<void>;
   selectPrevMemo: () => Promise<void>;
   selectNextMemo: () => Promise<void>;
+  toggleSelectMode: () => void;
+  toggleSelectMemo: (id: string) => void;
+  clearSelection: () => void;
 }
 
 export const useMemoStore = create<MemoStore>((set, get) => ({
@@ -32,6 +37,8 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
   activeId: null,
   searchQuery: "",
   loading: false,
+  selectedIds: new Set<string>(),
+  selectMode: false,
 
   loadMemos: async () => {
     const memos = await ListMemos(0, 100);
@@ -101,5 +108,29 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
     const currentIndex = memos.findIndex((m) => m.id === activeId);
     if (currentIndex < 0 || currentIndex >= memos.length - 1) return;
     await selectMemo(memos[currentIndex + 1].id);
+  },
+
+  toggleSelectMode: () => {
+    const { selectMode } = get();
+    if (selectMode) {
+      set({ selectMode: false, selectedIds: new Set<string>() });
+    } else {
+      set({ selectMode: true });
+    }
+  },
+
+  toggleSelectMemo: (id: string) => {
+    const { selectedIds } = get();
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    set({ selectedIds: next });
+  },
+
+  clearSelection: () => {
+    set({ selectedIds: new Set<string>(), selectMode: false });
   },
 }));
