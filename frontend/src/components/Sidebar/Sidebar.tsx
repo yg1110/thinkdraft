@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useUIStore } from "../../stores/uiStore";
 import { useMemoStore } from "../../stores/memoStore";
 import { useBlogStore } from "../../stores/blogStore";
+import { useTagStore } from "../../stores/tagStore";
 import ConfirmModal from "../Modal/ConfirmModal";
 
 const NAV_ITEMS = [
@@ -28,8 +29,9 @@ const TEMPLATE_LABELS: Record<string, string> = {
 
 export default function Sidebar() {
   const { sidebarView, setSidebarView, setActiveView } = useUIStore();
-  const { createMemo } = useMemoStore();
+  const { createMemo, setFilterTag, filterTagId } = useMemoStore();
   const { drafts, loadDrafts, selectDraft, deleteDraft } = useBlogStore();
+  const { tags, loadTags } = useTagStore();
   const [hoveredDraftId, setHoveredDraftId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -37,18 +39,36 @@ export default function Sidebar() {
     if (sidebarView === "drafts") {
       loadDrafts();
     }
-  }, [sidebarView, loadDrafts]);
+    if (sidebarView === "tags") {
+      loadTags();
+    }
+  }, [sidebarView, loadDrafts, loadTags]);
 
   const handleNavClick = useCallback(
     (id: (typeof NAV_ITEMS)[number]["id"]) => {
       setSidebarView(id);
       if (id === "memos") {
         setActiveView("memos");
+        setFilterTag(null);
       } else if (id === "drafts") {
         setActiveView("drafts");
+      } else if (id === "tags") {
+        setActiveView("memos");
       }
     },
-    [setSidebarView, setActiveView]
+    [setSidebarView, setActiveView, setFilterTag]
+  );
+
+  const handleTagClick = useCallback(
+    (tagId: string, tagName: string) => {
+      if (filterTagId === tagId) {
+        setFilterTag(null);
+      } else {
+        setFilterTag(tagId, tagName);
+      }
+      setActiveView("memos");
+    },
+    [filterTagId, setFilterTag, setActiveView]
   );
 
   const handleDraftClick = useCallback(
@@ -163,6 +183,98 @@ export default function Sidebar() {
               {item.label}
             </button>
           ))}
+
+          {/* Tags List */}
+          {sidebarView === "tags" && (
+            <div style={{ marginTop: "var(--spacing-xs)" }}>
+              <div
+                className="uppercase"
+                style={{
+                  color: "var(--color-ink-tertiary)",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.5px",
+                  padding:
+                    "var(--spacing-sm) var(--spacing-sm) var(--spacing-xxs)",
+                }}
+              >
+                Tags
+              </div>
+              {tags.length === 0 ? (
+                <div
+                  style={{
+                    color: "var(--color-ink-tertiary)",
+                    fontSize: "12px",
+                    padding: "var(--spacing-xs) var(--spacing-sm)",
+                  }}
+                >
+                  No tags yet
+                </div>
+              ) : (
+                tags.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => handleTagClick(t.id, t.name)}
+                    className="titlebar-no-drag w-full text-left cursor-pointer"
+                    style={{
+                      background:
+                        filterTagId === t.id
+                          ? "var(--color-primary-muted)"
+                          : "transparent",
+                      border: "none",
+                      borderRadius: "var(--rounded-sm)",
+                      padding: "var(--spacing-xs) var(--spacing-sm)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      color:
+                        filterTagId === t.id
+                          ? "var(--color-primary)"
+                          : "var(--color-ink-secondary)",
+                      fontSize: "13px",
+                      fontWeight: 500,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (filterTagId !== t.id) {
+                        e.currentTarget.style.background =
+                          "var(--color-primary-muted)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (filterTagId !== t.id) {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
+                  >
+                    <span
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {t.name}
+                    </span>
+                    <span
+                      style={{
+                        background: "var(--color-canvas-secondary)",
+                        color: "var(--color-ink-tertiary)",
+                        borderRadius: "var(--rounded-pill)",
+                        padding: "1px 6px",
+                        fontSize: "10px",
+                        fontWeight: 500,
+                        flexShrink: 0,
+                        marginLeft: "var(--spacing-xs)",
+                      }}
+                    >
+                      {t.count}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
 
           {/* Blog Drafts List */}
           {sidebarView === "drafts" && (

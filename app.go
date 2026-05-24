@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"thinkdraft/internal/ai"
 	"thinkdraft/internal/db"
 	"thinkdraft/internal/memo"
+	"thinkdraft/internal/tag"
+	"thinkdraft/internal/wiki"
 )
 
 type App struct {
@@ -13,6 +16,9 @@ type App struct {
 	conn      *sql.DB
 	memoSvc   *memo.Service
 	organizer *ai.Organizer
+	wikiSvc   *wiki.WikiService
+	tagSvc    *tag.Service
+	tagger    *ai.Tagger
 }
 
 func NewApp() *App {
@@ -34,6 +40,10 @@ func (a *App) startup(ctx context.Context) {
 	claudeClient := ai.NewClaudeClient()
 	draftRepo := ai.NewBlogDraftRepository(conn)
 	a.organizer = ai.NewOrganizer(claudeClient, draftRepo, memoRepo)
+
+	a.wikiSvc = wiki.NewWikiService(conn)
+	a.tagSvc = tag.NewService(tag.NewRepository(conn))
+	a.tagger = ai.NewTagger(claudeClient)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -92,4 +102,62 @@ func (a *App) UpdateBlogDraft(id string, title *string, content *string) (*ai.Bl
 
 func (a *App) DeleteBlogDraft(id string) error {
 	return a.organizer.DeleteDraft(id)
+}
+
+// --- Wiki Link Bindings (exposed to React) ---
+
+func (a *App) GetBacklinks(memoID string) ([]wiki.BacklinkInfo, error) {
+	return a.wikiSvc.GetBacklinks(memoID)
+}
+
+func (a *App) ResolveWikiLinks(titles []string) ([]wiki.ResolvedLink, error) {
+	return a.wikiSvc.ResolveLinksByTitle(titles)
+}
+
+// --- Tag Bindings (exposed to React) ---
+
+func (a *App) AddTagToMemo(memoID string, tagName string) (*tag.Tag, error) {
+	return a.tagSvc.AddTagToMemo(memoID, tagName, "user")
+}
+
+func (a *App) RemoveTagFromMemo(memoID string, tagID string) error {
+	return a.tagSvc.RemoveTagFromMemo(memoID, tagID)
+}
+
+func (a *App) GetMemoTags(memoID string) ([]tag.Tag, error) {
+	return a.tagSvc.GetMemoTags(memoID)
+}
+
+func (a *App) ListTags() ([]tag.TagWithCount, error) {
+	return a.tagSvc.ListTags()
+}
+
+func (a *App) SearchTags(prefix string) ([]tag.Tag, error) {
+	return a.tagSvc.SearchTags(prefix)
+}
+
+func (a *App) GetMemosByTag(tagID string) ([]string, error) {
+	return a.tagSvc.GetMemosByTag(tagID)
+}
+
+// --- AI Tag Suggestion Binding (exposed to React) ---
+
+func (a *App) SuggestTags(memoID string) ([]string, error) {
+	m, err := a.memoSvc.Get(memoID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch memo: %w", err)
+	}
+
+	// Get existing tag names so Claude can reuse them.
+	allTags, err := a.tagSvc.ListTags()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tags: %w", err)
+	}
+
+	var existingNames []string
+	for _, t := range allTags {
+		existingNames = append(existingNames, t.Name)
+	}
+
+	return a.tagger.SuggestTags(m.Content, existingNames)
 }

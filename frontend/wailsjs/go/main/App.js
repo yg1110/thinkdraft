@@ -49,3 +49,39 @@ export function UpdateBlogDraft(arg1, arg2, arg3) {
 export function UpdateMemo(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateMemo'](arg1, arg2, arg3);
 }
+
+export function GetBacklinks(arg1) {
+  return window['go']['main']['App']['GetBacklinks'](arg1);
+}
+
+export function ResolveWikiLinks(arg1) {
+  return window['go']['main']['App']['ResolveWikiLinks'](arg1);
+}
+
+export function AddTagToMemo(arg1, arg2) {
+  return window['go']['main']['App']['AddTagToMemo'](arg1, arg2);
+}
+
+export function RemoveTagFromMemo(arg1, arg2) {
+  return window['go']['main']['App']['RemoveTagFromMemo'](arg1, arg2);
+}
+
+export function GetMemoTags(arg1) {
+  return window['go']['main']['App']['GetMemoTags'](arg1);
+}
+
+export function ListTags() {
+  return window['go']['main']['App']['ListTags']();
+}
+
+export function SearchTags(arg1) {
+  return window['go']['main']['App']['SearchTags'](arg1);
+}
+
+export function GetMemosByTag(arg1) {
+  return window['go']['main']['App']['GetMemosByTag'](arg1);
+}
+
+export function SuggestTags(arg1) {
+  return window['go']['main']['App']['SuggestTags'](arg1);
+}

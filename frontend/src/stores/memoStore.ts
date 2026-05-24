@@ -6,6 +6,7 @@ import {
   GetMemo,
   ListMemos,
   SearchMemos,
+  GetMemosByTag,
 } from "../../wailsjs/go/main/App";
 import { memo } from "../../wailsjs/go/models";
 
@@ -17,8 +18,11 @@ interface MemoStore {
   loading: boolean;
   selectedIds: Set<string>;
   selectMode: boolean;
+  filterTagId: string | null;
+  filterTagName: string | null;
 
   loadMemos: () => Promise<void>;
+  setFilterTag: (tagId: string | null, tagName?: string | null) => void;
   search: (query: string) => Promise<void>;
   selectMemo: (id: string) => Promise<void>;
   createMemo: () => Promise<void>;
@@ -39,8 +43,28 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
   loading: false,
   selectedIds: new Set<string>(),
   selectMode: false,
+  filterTagId: null,
+  filterTagName: null,
+
+  setFilterTag: (tagId: string | null, tagName?: string | null) => {
+    set({ filterTagId: tagId, filterTagName: tagName ?? null });
+    get().loadMemos();
+  },
 
   loadMemos: async () => {
+    const { filterTagId } = get();
+    if (filterTagId) {
+      const memoIds = await GetMemosByTag(filterTagId);
+      if (!memoIds || memoIds.length === 0) {
+        set({ memos: [] });
+        return;
+      }
+      // Load full memo list and filter to matching IDs
+      const allMemos = await ListMemos(0, 100);
+      const idSet = new Set(memoIds);
+      set({ memos: (allMemos || []).filter((m) => idSet.has(m.id)) });
+      return;
+    }
     const memos = await ListMemos(0, 100);
     set({ memos: memos || [] });
   },

@@ -55,6 +55,78 @@ export namespace ai {
 
 }
 
+export namespace wiki {
+
+	export class BacklinkInfo {
+	    memoId: string;
+	    title: string | null;
+	    preview: string;
+
+	    static createFrom(source: any = {}) {
+	        return new BacklinkInfo(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.memoId = source["memoId"];
+	        this.title = source["title"];
+	        this.preview = source["preview"];
+	    }
+	}
+	export class ResolvedLink {
+	    title: string;
+	    memoId: string;
+	    exists: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new ResolvedLink(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.memoId = source["memoId"];
+	        this.exists = source["exists"];
+	    }
+	}
+
+}
+
+export namespace tag {
+
+	export class Tag {
+	    id: string;
+	    name: string;
+
+	    static createFrom(source: any = {}) {
+	        return new Tag(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	    }
+	}
+	export class TagWithCount {
+	    id: string;
+	    name: string;
+	    count: number;
+
+	    static createFrom(source: any = {}) {
+	        return new TagWithCount(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.count = source["count"];
+	    }
+	}
+
+}
+
 export namespace memo {
 	
 	export class Memo {

@@ -276,6 +276,24 @@ body,
   color: #636366;
 }
 
+/* ─── Wiki Links ─── */
+.wiki-link {
+  color: var(--color-primary);
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+.wiki-link:hover {
+  text-decoration: underline solid;
+}
+.wiki-link-missing {
+  color: var(--color-ink-danger);
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+.wiki-link-missing:hover {
+  text-decoration: underline solid;
+}
+
 /* ─── Spinner animation ─── */
 @keyframes spin {
   to {

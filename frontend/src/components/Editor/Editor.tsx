@@ -5,6 +5,10 @@ import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useMemoStore } from "../../stores/memoStore";
+import { WikiLink } from "./WikiLinkExtension";
+import WikiLinkSuggestion from "./WikiLinkSuggestion";
+import TagInput from "../Tags/TagInput";
+import { ResolveWikiLinks } from "../../../wailsjs/go/main/App";
 
 const lowlight = createLowlight(common);
 
@@ -34,6 +38,7 @@ export default function Editor() {
       Placeholder.configure({
         placeholder: "Start writing...",
       }),
+      WikiLink,
     ],
     content: "",
     onUpdate: ({ editor: e }) => {
@@ -54,6 +59,8 @@ export default function Editor() {
       if (currentContent !== activeMemo.content) {
         editor.commands.setContent(activeMemo.content || "");
       }
+      // Resolve wiki links after setting content
+      resolveLinksInEditor(editor);
     }
     if (editor && !activeMemo) {
       editor.commands.setContent("");
@@ -141,10 +148,16 @@ export default function Editor() {
       {/* Editor */}
       <div
         className="flex-1 overflow-y-auto"
-        style={{ padding: "var(--spacing-md) var(--spacing-xxl) var(--spacing-xxl)" }}
+        style={{ padding: "var(--spacing-md) var(--spacing-xxl) var(--spacing-md)" }}
       >
         <EditorContent editor={editor} />
       </div>
+
+      {/* Tags */}
+      {activeId && <TagInput memoID={activeId} />}
+
+      {/* WikiLink suggestion dropdown */}
+      <WikiLinkSuggestion editor={editor} />
 
       {/* Status bar */}
       <div
@@ -160,4 +173,50 @@ export default function Editor() {
       </div>
     </div>
   );
+}
+
+/**
+ * After loading content, resolve wiki links to check existence and update attrs.
+ */
+async function resolveLinksInEditor(editor: ReturnType<typeof useEditor>) {
+  if (!editor) return;
+
+  const titles: string[] = [];
+  editor.state.doc.descendants((node) => {
+    if (node.type.name === "wikiLink" && node.attrs.title) {
+      titles.push(node.attrs.title);
+    }
+  });
+
+  if (titles.length === 0) return;
+
+  try {
+    const resolved = await ResolveWikiLinks(titles);
+    if (!resolved || resolved.length === 0) return;
+
+    const resolvedMap = new Map(resolved.map((r) => [r.title, r.exists]));
+
+    // Walk through the doc and update `exists` attribute where needed
+    const { tr } = editor.state;
+    let modified = false;
+
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name === "wikiLink" && node.attrs.title) {
+        const exists = resolvedMap.get(node.attrs.title);
+        if (exists !== undefined && exists !== node.attrs.exists) {
+          tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            exists,
+          });
+          modified = true;
+        }
+      }
+    });
+
+    if (modified) {
+      editor.view.dispatch(tr);
+    }
+  } catch {
+    // Silently ignore resolution failures
+  }
 }

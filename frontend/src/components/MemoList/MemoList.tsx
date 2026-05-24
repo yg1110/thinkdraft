@@ -20,6 +20,9 @@ export default function MemoList({ width }: MemoListProps) {
     selectedIds,
     toggleSelectMode,
     toggleSelectMemo,
+    filterTagId,
+    filterTagName,
+    setFilterTag,
   } = useMemoStore();
   const { openTemplateModal } = useUIStore();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -185,6 +188,53 @@ export default function MemoList({ width }: MemoListProps) {
               )}
             </button>
           </div>
+
+          {/* Tag filter indicator */}
+          {filterTagId && filterTagName && (
+            <div
+              className="titlebar-no-drag"
+              style={{
+                padding: "0 var(--spacing-sm) var(--spacing-xs)",
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--spacing-xs)",
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  background: "var(--color-primary-muted)",
+                  color: "var(--color-primary)",
+                  borderRadius: "var(--rounded-xs)",
+                  padding: "2px 8px",
+                  fontSize: "12px",
+                  lineHeight: 1,
+                }}
+              >
+                Tag: {filterTagName}
+                <button
+                  onClick={() => setFilterTag(null)}
+                  aria-label="Clear tag filter"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--color-primary)",
+                    cursor: "pointer",
+                    padding: 0,
+                    fontSize: "12px",
+                    lineHeight: 1,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    marginLeft: "2px",
+                  }}
+                >
+                  x
+                </button>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Memo Items */}
