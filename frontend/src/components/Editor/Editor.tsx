@@ -10,6 +10,7 @@ import { WikiLink } from "./WikiLinkExtension";
 import WikiLinkSuggestion from "./WikiLinkSuggestion";
 import TagInput from "../Tags/TagInput";
 import CoachBanner from "../Coach/CoachBanner";
+import SyncIndicator from "../SyncIndicator/SyncIndicator";
 import { ResolveWikiLinks } from "../../../wailsjs/go/main/App";
 
 const lowlight = createLowlight(common);
@@ -178,7 +179,7 @@ export default function Editor() {
           fontSize: "12px",
         }}
       >
-        <span>Saved locally</span>
+        <SyncIndicator />
       </div>
     </div>
   );

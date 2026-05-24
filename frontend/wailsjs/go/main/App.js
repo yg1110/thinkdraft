@@ -10,6 +10,10 @@ export function CheckClaudeInstalled() {
   return window['go']['main']['App']['CheckClaudeInstalled']();
 }
 
+export function CheckNudge() {
+  return window['go']['main']['App']['CheckNudge']();
+}
+
 export function CreateMemo(arg1) {
   return window['go']['main']['App']['CreateMemo'](arg1);
 }
@@ -20,6 +24,10 @@ export function DeleteBlogDraft(arg1) {
 
 export function DeleteMemo(arg1) {
   return window['go']['main']['App']['DeleteMemo'](arg1);
+}
+
+export function DismissCoachLog(arg1) {
+  return window['go']['main']['App']['DismissCoachLog'](arg1);
 }
 
 export function GenerateBlogDraft(arg1, arg2) {
@@ -34,6 +42,14 @@ export function GetBlogDraft(arg1) {
   return window['go']['main']['App']['GetBlogDraft'](arg1);
 }
 
+export function GetCoachLogs(arg1, arg2) {
+  return window['go']['main']['App']['GetCoachLogs'](arg1, arg2);
+}
+
+export function GetLastSynced() {
+  return window['go']['main']['App']['GetLastSynced']();
+}
+
 export function GetMemo(arg1) {
   return window['go']['main']['App']['GetMemo'](arg1);
 }
@@ -44,6 +60,18 @@ export function GetMemoTags(arg1) {
 
 export function GetMemosByTag(arg1) {
   return window['go']['main']['App']['GetMemosByTag'](arg1);
+}
+
+export function GetSyncStatus() {
+  return window['go']['main']['App']['GetSyncStatus']();
+}
+
+export function GetTopicSuggestions() {
+  return window['go']['main']['App']['GetTopicSuggestions']();
+}
+
+export function GetWeeklyReport() {
+  return window['go']['main']['App']['GetWeeklyReport']();
 }
 
 export function ListBlogDrafts() {
@@ -78,30 +106,14 @@ export function SuggestTags(arg1) {
   return window['go']['main']['App']['SuggestTags'](arg1);
 }
 
+export function SyncNow() {
+  return window['go']['main']['App']['SyncNow']();
+}
+
 export function UpdateBlogDraft(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateBlogDraft'](arg1, arg2, arg3);
 }
 
 export function UpdateMemo(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateMemo'](arg1, arg2, arg3);
-}
-
-export function GetWeeklyReport() {
-  return window['go']['main']['App']['GetWeeklyReport']();
-}
-
-export function GetTopicSuggestions() {
-  return window['go']['main']['App']['GetTopicSuggestions']();
-}
-
-export function CheckNudge() {
-  return window['go']['main']['App']['CheckNudge']();
-}
-
-export function DismissCoachLog(arg1) {
-  return window['go']['main']['App']['DismissCoachLog'](arg1);
-}
-
-export function GetCoachLogs(arg1, arg2) {
-  return window['go']['main']['App']['GetCoachLogs'](arg1, arg2);
 }

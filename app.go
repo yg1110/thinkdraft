@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"os"
 	"thinkdraft/internal/ai"
 	"thinkdraft/internal/db"
 	"thinkdraft/internal/memo"
+	"thinkdraft/internal/sync"
 	"thinkdraft/internal/tag"
 	"thinkdraft/internal/wiki"
 )
@@ -19,7 +22,9 @@ type App struct {
 	wikiSvc   *wiki.WikiService
 	tagSvc    *tag.Service
 	tagger    *ai.Tagger
-	coach     *ai.Coach
+	coach      *ai.Coach
+	syncEngine *sync.Engine
+	syncQueue  *sync.Queue
 }
 
 func NewApp() *App {
@@ -49,9 +54,29 @@ func (a *App) startup(ctx context.Context) {
 
 	coachLogRepo := ai.NewCoachLogRepository(conn)
 	a.coach = ai.NewCoach(claudeClient, memoRepo, tagRepo, coachLogRepo)
+
+	// --- Sync Engine ---
+	syncQueue := sync.NewQueue(conn)
+	a.syncQueue = syncQueue
+
+	syncBaseURL := os.Getenv("THINKDRAFT_SYNC_URL")
+	if syncBaseURL == "" {
+		syncBaseURL = "http://localhost:3000"
+	}
+	syncAPIKey := os.Getenv("THINKDRAFT_API_KEY")
+	if syncAPIKey == "" {
+		syncAPIKey = "your-api-key-here"
+	}
+
+	syncClient := sync.NewClient(syncBaseURL, syncAPIKey)
+	a.syncEngine = sync.NewEngine(syncQueue, syncClient, memoRepo, conn)
+	a.syncEngine.Start()
 }
 
 func (a *App) shutdown(ctx context.Context) {
+	if a.syncEngine != nil {
+		a.syncEngine.Stop()
+	}
 	if a.conn != nil {
 		a.conn.Close()
 	}
@@ -60,15 +85,30 @@ func (a *App) shutdown(ctx context.Context) {
 // --- Memo Bindings (exposed to React) ---
 
 func (a *App) CreateMemo(content string) (*memo.Memo, error) {
-	return a.memoSvc.Create(content)
+	m, err := a.memoSvc.Create(content)
+	if err == nil && a.syncQueue != nil {
+		payload, _ := json.Marshal(m)
+		_ = a.syncQueue.Enqueue("memo", m.ID, "create", string(payload))
+	}
+	return m, err
 }
 
 func (a *App) UpdateMemo(id string, title *string, content *string) (*memo.Memo, error) {
-	return a.memoSvc.Update(id, title, content)
+	m, err := a.memoSvc.Update(id, title, content)
+	if err == nil && a.syncQueue != nil {
+		payload, _ := json.Marshal(m)
+		_ = a.syncQueue.Enqueue("memo", m.ID, "update", string(payload))
+	}
+	return m, err
 }
 
 func (a *App) DeleteMemo(id string) error {
-	return a.memoSvc.Delete(id)
+	err := a.memoSvc.Delete(id)
+	if err == nil && a.syncQueue != nil {
+		payload, _ := json.Marshal(map[string]string{"id": id})
+		_ = a.syncQueue.Enqueue("memo", id, "delete", string(payload))
+	}
+	return err
 }
 
 func (a *App) GetMemo(id string) (*memo.Memo, error) {
@@ -187,4 +227,27 @@ func (a *App) DismissCoachLog(id string) error {
 
 func (a *App) GetCoachLogs(logType string, limit int) ([]ai.CoachLog, error) {
 	return a.coach.GetCoachLogs(logType, limit)
+}
+
+// --- Sync Bindings (exposed to React) ---
+
+func (a *App) SyncNow() error {
+	if a.syncEngine == nil {
+		return fmt.Errorf("sync engine not initialized")
+	}
+	return a.syncEngine.SyncNow()
+}
+
+func (a *App) GetSyncStatus() string {
+	if a.syncEngine == nil {
+		return string(sync.SyncStatusOffline)
+	}
+	return string(a.syncEngine.GetStatus())
+}
+
+func (a *App) GetLastSynced() string {
+	if a.syncEngine == nil {
+		return ""
+	}
+	return a.syncEngine.GetLastSynced()
 }

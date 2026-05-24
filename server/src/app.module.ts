@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
 import { ApiKeyGuard } from './common/guards/api-key.guard';
 import { HealthModule } from './health/health.module';
+import { SyncModule } from './sync/sync.module';
 import { Memo } from './entities/memo.entity';
 import { Tag } from './entities/tag.entity';
 import { MemoTag } from './entities/memo-tag.entity';
@@ -31,6 +32,7 @@ import { BlogDraft } from './entities/blog-draft.entity';
       }),
     }),
     HealthModule,
+    SyncModule,
   ],
   providers: [
     {
