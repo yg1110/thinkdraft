@@ -19,6 +19,7 @@ type App struct {
 	wikiSvc   *wiki.WikiService
 	tagSvc    *tag.Service
 	tagger    *ai.Tagger
+	coach     *ai.Coach
 }
 
 func NewApp() *App {
@@ -42,8 +43,12 @@ func (a *App) startup(ctx context.Context) {
 	a.organizer = ai.NewOrganizer(claudeClient, draftRepo, memoRepo)
 
 	a.wikiSvc = wiki.NewWikiService(conn)
-	a.tagSvc = tag.NewService(tag.NewRepository(conn))
+	tagRepo := tag.NewRepository(conn)
+	a.tagSvc = tag.NewService(tagRepo)
 	a.tagger = ai.NewTagger(claudeClient)
+
+	coachLogRepo := ai.NewCoachLogRepository(conn)
+	a.coach = ai.NewCoach(claudeClient, memoRepo, tagRepo, coachLogRepo)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -160,4 +165,26 @@ func (a *App) SuggestTags(memoID string) ([]string, error) {
 	}
 
 	return a.tagger.SuggestTags(m.Content, existingNames)
+}
+
+// --- AI Coach Bindings (exposed to React) ---
+
+func (a *App) GetWeeklyReport() (*ai.WeeklyReport, error) {
+	return a.coach.GetWeeklyReport()
+}
+
+func (a *App) GetTopicSuggestions() ([]ai.TopicSuggestion, error) {
+	return a.coach.GetTopicSuggestions()
+}
+
+func (a *App) CheckNudge() (*ai.NudgeMessage, error) {
+	return a.coach.CheckNudge()
+}
+
+func (a *App) DismissCoachLog(id string) error {
+	return a.coach.DismissLog(id)
+}
+
+func (a *App) GetCoachLogs(logType string, limit int) ([]ai.CoachLog, error) {
+	return a.coach.GetCoachLogs(logType, limit)
 }

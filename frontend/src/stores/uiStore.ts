@@ -7,7 +7,7 @@ interface UIStore {
   memoListWidth: number;
   commandPaletteOpen: boolean;
   templateModalOpen: boolean;
-  activeView: "memos" | "drafts";
+  activeView: "memos" | "drafts" | "coach";
 
   toggleSidebar: () => void;
   setSidebarView: (view: UIStore["sidebarView"]) => void;

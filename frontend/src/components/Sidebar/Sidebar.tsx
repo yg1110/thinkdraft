@@ -54,6 +54,8 @@ export default function Sidebar() {
         setActiveView("drafts");
       } else if (id === "tags") {
         setActiveView("memos");
+      } else if (id === "coach") {
+        setActiveView("coach");
       }
     },
     [setSidebarView, setActiveView, setFilterTag]

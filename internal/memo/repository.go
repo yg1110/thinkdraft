@@ -97,6 +97,45 @@ func scanSummaries(rows *sql.Rows) ([]MemoSummary, error) {
 	return summaries, rows.Err()
 }
 
+// ListSince returns all non-deleted memos with created_at >= the given ISO 8601 string.
+func (r *Repository) ListSince(since string) ([]Memo, error) {
+	rows, err := r.db.Query(
+		`SELECT id, title, content, created_at, updated_at, deleted_at, sync_status
+		 FROM memos
+		 WHERE deleted_at IS NULL AND created_at >= ?
+		 ORDER BY created_at DESC`, since,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var memos []Memo
+	for rows.Next() {
+		var m Memo
+		if err := rows.Scan(&m.ID, &m.Title, &m.Content, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt, &m.SyncStatus); err != nil {
+			return nil, err
+		}
+		memos = append(memos, m)
+	}
+	return memos, rows.Err()
+}
+
+// GetLastMemoDate returns the created_at of the most recent non-deleted memo.
+func (r *Repository) GetLastMemoDate() (string, error) {
+	var createdAt string
+	err := r.db.QueryRow(
+		`SELECT created_at FROM memos
+		 WHERE deleted_at IS NULL
+		 ORDER BY created_at DESC
+		 LIMIT 1`,
+	).Scan(&createdAt)
+	if err != nil {
+		return "", err
+	}
+	return createdAt, nil
+}
+
 func truncate(s string, maxLen int) string {
 	s = strings.ReplaceAll(s, "\n", " ")
 	if len(s) <= maxLen {

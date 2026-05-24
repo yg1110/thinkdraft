@@ -30,6 +30,113 @@ export namespace ai {
 	        this.updatedAt = source["updatedAt"];
 	    }
 	}
+	export class CoachLog {
+		id: string;
+		type: string;
+		content: string;
+		createdAt: string;
+		dismissed: boolean;
+
+		static createFrom(source: any = {}) {
+			return new CoachLog(source);
+		}
+
+		constructor(source: any = {}) {
+			if ('string' === typeof source) source = JSON.parse(source);
+			this.id = source["id"];
+			this.type = source["type"];
+			this.content = source["content"];
+			this.createdAt = source["createdAt"];
+			this.dismissed = source["dismissed"];
+		}
+	}
+	export class TagStat {
+		name: string;
+		count: number;
+
+		static createFrom(source: any = {}) {
+			return new TagStat(source);
+		}
+
+		constructor(source: any = {}) {
+			if ('string' === typeof source) source = JSON.parse(source);
+			this.name = source["name"];
+			this.count = source["count"];
+		}
+	}
+	export class WeeklyReport {
+		id: string;
+		memoCount: number;
+		wordCount: number;
+		tagDistribution: TagStat[];
+		insights: string;
+		createdAt: string;
+
+		static createFrom(source: any = {}) {
+			return new WeeklyReport(source);
+		}
+
+		constructor(source: any = {}) {
+			if ('string' === typeof source) source = JSON.parse(source);
+			this.id = source["id"];
+			this.memoCount = source["memoCount"];
+			this.wordCount = source["wordCount"];
+			this.tagDistribution = this.convertValues(source["tagDistribution"], TagStat);
+			this.insights = source["insights"];
+			this.createdAt = source["createdAt"];
+		}
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+			if (!a) {
+				return a;
+			}
+			if (a.length) {
+				return (a as any[]).map(elem => new classs(elem));
+			}
+			if (asMap) {
+				const d: any = {};
+				for (const key of Object.keys(a)) {
+					d[key] = new classs(a[key]);
+				}
+				return d;
+			}
+			return new classs(a);
+		}
+	}
+	export class TopicSuggestion {
+		title: string;
+		description: string;
+		relatedMemoIds: string[];
+
+		static createFrom(source: any = {}) {
+			return new TopicSuggestion(source);
+		}
+
+		constructor(source: any = {}) {
+			if ('string' === typeof source) source = JSON.parse(source);
+			this.title = source["title"];
+			this.description = source["description"];
+			this.relatedMemoIds = source["relatedMemoIds"];
+		}
+	}
+	export class NudgeMessage {
+		id: string;
+		message: string;
+		daysSince: number;
+		createdAt: string;
+
+		static createFrom(source: any = {}) {
+			return new NudgeMessage(source);
+		}
+
+		constructor(source: any = {}) {
+			if ('string' === typeof source) source = JSON.parse(source);
+			this.id = source["id"];
+			this.message = source["message"];
+			this.daysSince = source["daysSince"];
+			this.createdAt = source["createdAt"];
+		}
+	}
 	export class BlogDraftSummary {
 	    id: string;
 	    template: string;
@@ -50,78 +157,6 @@ export namespace ai {
 	        this.status = source["status"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
-	    }
-	}
-
-}
-
-export namespace wiki {
-
-	export class BacklinkInfo {
-	    memoId: string;
-	    title: string | null;
-	    preview: string;
-
-	    static createFrom(source: any = {}) {
-	        return new BacklinkInfo(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.memoId = source["memoId"];
-	        this.title = source["title"];
-	        this.preview = source["preview"];
-	    }
-	}
-	export class ResolvedLink {
-	    title: string;
-	    memoId: string;
-	    exists: boolean;
-
-	    static createFrom(source: any = {}) {
-	        return new ResolvedLink(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.title = source["title"];
-	        this.memoId = source["memoId"];
-	        this.exists = source["exists"];
-	    }
-	}
-
-}
-
-export namespace tag {
-
-	export class Tag {
-	    id: string;
-	    name: string;
-
-	    static createFrom(source: any = {}) {
-	        return new Tag(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	    }
-	}
-	export class TagWithCount {
-	    id: string;
-	    name: string;
-	    count: number;
-
-	    static createFrom(source: any = {}) {
-	        return new TagWithCount(source);
-	    }
-
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
-	        this.name = source["name"];
-	        this.count = source["count"];
 	    }
 	}
 
@@ -171,6 +206,78 @@ export namespace memo {
 	        this.preview = source["preview"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
+	    }
+	}
+
+}
+
+export namespace tag {
+	
+	export class Tag {
+	    id: string;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Tag(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	    }
+	}
+	export class TagWithCount {
+	    id: string;
+	    name: string;
+	    count: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new TagWithCount(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.count = source["count"];
+	    }
+	}
+
+}
+
+export namespace wiki {
+	
+	export class BacklinkInfo {
+	    memoId: string;
+	    title?: string;
+	    preview: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new BacklinkInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.memoId = source["memoId"];
+	        this.title = source["title"];
+	        this.preview = source["preview"];
+	    }
+	}
+	export class ResolvedLink {
+	    title: string;
+	    memoId?: string;
+	    exists: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ResolvedLink(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.memoId = source["memoId"];
+	        this.exists = source["exists"];
 	    }
 	}
 

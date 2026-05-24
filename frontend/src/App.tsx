@@ -6,8 +6,10 @@ import DraftEditor from "./components/BlogDraft/DraftEditor";
 import TemplateModal from "./components/BlogDraft/TemplateModal";
 import ResizeHandle from "./components/ResizeHandle/ResizeHandle";
 import CommandPalette from "./components/CommandPalette/CommandPalette";
+import WeeklyReport from "./components/Coach/WeeklyReport";
 import { useUIStore } from "./stores/uiStore";
 import { useMemoStore } from "./stores/memoStore";
+import { useCoachStore } from "./stores/coachStore";
 
 export default function App() {
   const {
@@ -20,7 +22,13 @@ export default function App() {
     activeView,
   } = useUIStore();
   const { createMemo, selectPrevMemo, selectNextMemo } = useMemoStore();
+  const { checkNudge } = useCoachStore();
   const prevSidebarOpenRef = useRef(sidebarOpen);
+
+  // Check for nudge on startup
+  useEffect(() => {
+    checkNudge();
+  }, [checkNudge]);
 
   // Responsive layout: auto-collapse sidebar below 900px
   useEffect(() => {
@@ -102,6 +110,8 @@ export default function App() {
             <ResizeHandle onResize={handleResize} />
             <Editor />
           </>
+        ) : activeView === "coach" ? (
+          <WeeklyReport />
         ) : (
           <DraftEditor />
         )}

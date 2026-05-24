@@ -5,15 +5,18 @@ import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { useMemoStore } from "../../stores/memoStore";
+import { useCoachStore } from "../../stores/coachStore";
 import { WikiLink } from "./WikiLinkExtension";
 import WikiLinkSuggestion from "./WikiLinkSuggestion";
 import TagInput from "../Tags/TagInput";
+import CoachBanner from "../Coach/CoachBanner";
 import { ResolveWikiLinks } from "../../../wailsjs/go/main/App";
 
 const lowlight = createLowlight(common);
 
 export default function Editor() {
   const { activeMemo, activeId, updateMemo } = useMemoStore();
+  const { nudge } = useCoachStore();
   const titleRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -74,39 +77,42 @@ export default function Editor() {
   if (!activeMemo) {
     return (
       <div
-        className="flex-1 flex items-center justify-center h-full"
+        className="flex-1 flex flex-col h-full"
         style={{
           background: "var(--color-canvas)",
           paddingTop: "var(--titlebar-height)",
         }}
       >
-        <div className="text-center">
-          <div
-            style={{
-              color: "var(--color-ink-tertiary)",
-              fontSize: "15px",
-              marginBottom: "var(--spacing-xs)",
-            }}
-          >
-            Select a memo or create a new one
-          </div>
-          <div
-            style={{
-              color: "var(--color-ink-tertiary)",
-              fontSize: "13px",
-            }}
-          >
-            <kbd
+        {nudge && <CoachBanner />}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div
               style={{
-                background: "var(--color-canvas-elevated)",
-                borderRadius: "var(--rounded-xs)",
-                padding: "2px 6px",
-                fontSize: "12px",
+                color: "var(--color-ink-tertiary)",
+                fontSize: "15px",
+                marginBottom: "var(--spacing-xs)",
               }}
             >
-              Cmd+N
-            </kbd>{" "}
-            to create
+              Select a memo or create a new one
+            </div>
+            <div
+              style={{
+                color: "var(--color-ink-tertiary)",
+                fontSize: "13px",
+              }}
+            >
+              <kbd
+                style={{
+                  background: "var(--color-canvas-elevated)",
+                  borderRadius: "var(--rounded-xs)",
+                  padding: "2px 6px",
+                  fontSize: "12px",
+                }}
+              >
+                Cmd+N
+              </kbd>{" "}
+              to create
+            </div>
           </div>
         </div>
       </div>
@@ -121,6 +127,9 @@ export default function Editor() {
         paddingTop: "var(--titlebar-height)",
       }}
     >
+      {/* Coach nudge banner */}
+      {nudge && <CoachBanner />}
+
       {/* Title */}
       <div style={{ padding: "var(--spacing-xl) var(--spacing-xxl) 0" }}>
         <input
