@@ -20,6 +20,7 @@ export default function Editor() {
   const { nudge } = useCoachStore();
   const titleRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressUpdateRef = useRef(false);
 
   const debouncedUpdate = useCallback(
     (title?: string, content?: string) => {
@@ -46,6 +47,7 @@ export default function Editor() {
     ],
     content: "",
     onUpdate: ({ editor: e }) => {
+      if (suppressUpdateRef.current) return;
       debouncedUpdate(undefined, e.getHTML());
     },
     editorProps: {
@@ -61,13 +63,17 @@ export default function Editor() {
     if (editor && activeMemo) {
       const currentContent = editor.getHTML();
       if (currentContent !== activeMemo.content) {
+        suppressUpdateRef.current = true;
         editor.commands.setContent(activeMemo.content || "");
+        suppressUpdateRef.current = false;
       }
       // Resolve wiki links after setting content
-      resolveLinksInEditor(editor);
+      resolveLinksInEditor(editor, suppressUpdateRef);
     }
     if (editor && !activeMemo) {
+      suppressUpdateRef.current = true;
       editor.commands.setContent("");
+      suppressUpdateRef.current = false;
     }
   }, [editor, activeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -188,7 +194,10 @@ export default function Editor() {
 /**
  * After loading content, resolve wiki links to check existence and update attrs.
  */
-async function resolveLinksInEditor(editor: ReturnType<typeof useEditor>) {
+async function resolveLinksInEditor(
+  editor: ReturnType<typeof useEditor>,
+  suppressUpdateRef: React.MutableRefObject<boolean>,
+) {
   if (!editor) return;
 
   const titles: string[] = [];
@@ -224,7 +233,9 @@ async function resolveLinksInEditor(editor: ReturnType<typeof useEditor>) {
     });
 
     if (modified) {
+      suppressUpdateRef.current = true;
       editor.view.dispatch(tr);
+      suppressUpdateRef.current = false;
     }
   } catch {
     // Silently ignore resolution failures

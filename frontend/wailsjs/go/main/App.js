@@ -110,6 +110,10 @@ export function SyncNow() {
   return window['go']['main']['App']['SyncNow']();
 }
 
+export function TogglePinMemo(arg1) {
+  return window['go']['main']['App']['TogglePinMemo'](arg1);
+}
+
 export function UpdateBlogDraft(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateBlogDraft'](arg1, arg2, arg3);
 }

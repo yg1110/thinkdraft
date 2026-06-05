@@ -20,6 +20,8 @@ export default function MemoList({ width }: MemoListProps) {
     selectedIds,
     toggleSelectMode,
     toggleSelectMemo,
+    togglePinMemo,
+    selectAll,
     filterTagId,
     filterTagName,
     setFilterTag,
@@ -52,6 +54,14 @@ export default function MemoList({ width }: MemoListProps) {
   const handleCancelDelete = useCallback(() => {
     setDeleteTarget(null);
   }, []);
+
+  const handlePinClick = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      togglePinMemo(id);
+    },
+    [togglePinMemo]
+  );
 
   const handleMemoClick = useCallback(
     (id: string) => {
@@ -326,10 +336,29 @@ export default function MemoList({ width }: MemoListProps) {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          paddingRight: selectMode ? "0" : "24px",
+                          paddingRight: selectMode ? "0" : "48px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
                         }}
                       >
-                        {memo.title || "Untitled"}
+                        {memo.pinned && (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            style={{
+                              flexShrink: 0,
+                              color: "var(--color-primary)",
+                            }}
+                          >
+                            <path d="M9.828 1.282a1 1 0 0 1 1.414 0l3.476 3.476a1 1 0 0 1 0 1.414L13.414 7.476l.293.293a1 1 0 0 1 0 1.414l-2.829 2.829a1 1 0 0 1-1.414 0L9.17 11.72l-3.013 3.013a.5.5 0 0 1-.707 0l-.354-.354a.5.5 0 0 1 0-.707l3.013-3.012-.293-.293a1 1 0 0 1 0-1.414l2.829-2.829a1 1 0 0 1 1.414 0l.293.293 1.304-1.304-3.476-3.476a1 1 0 0 1 0-1.414l.172-.172z" />
+                          </svg>
+                        )}
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {memo.title || "Untitled"}
+                        </span>
                       </div>
                       <div
                         style={{
@@ -355,41 +384,78 @@ export default function MemoList({ width }: MemoListProps) {
                     </div>
                   </button>
 
-                  {/* Delete button (visible on hover, hidden in select mode) */}
+                  {/* Pin & Delete buttons (visible on hover, hidden in select mode) */}
                   {!selectMode && hoveredId === memo.id && (
-                    <button
-                      onClick={(e) => handleDeleteClick(e, memo.id)}
-                      aria-label={`Delete memo: ${memo.title || "Untitled"}`}
-                      className="titlebar-no-drag"
+                    <div
                       style={{
                         position: "absolute",
                         top: "var(--spacing-xs)",
                         right: "var(--spacing-xs)",
-                        width: "22px",
-                        height: "22px",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        background: "var(--color-canvas-secondary)",
-                        border: "1px solid var(--color-hairline)",
-                        borderRadius: "var(--rounded-sm)",
-                        color: "var(--color-ink-secondary)",
-                        fontSize: "14px",
-                        lineHeight: 1,
-                        cursor: "pointer",
-                        padding: 0,
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "var(--color-ink-danger)";
-                        e.currentTarget.style.borderColor = "var(--color-ink-danger)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = "var(--color-ink-secondary)";
-                        e.currentTarget.style.borderColor = "var(--color-hairline)";
+                        gap: "2px",
                       }}
                     >
-                      x
-                    </button>
+                      <button
+                        onClick={(e) => handlePinClick(e, memo.id)}
+                        aria-label={memo.pinned ? "Unpin memo" : "Pin memo"}
+                        className="titlebar-no-drag"
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: memo.pinned
+                            ? "var(--color-primary-muted)"
+                            : "var(--color-canvas-secondary)",
+                          border: memo.pinned
+                            ? "1px solid var(--color-primary)"
+                            : "1px solid var(--color-hairline)",
+                          borderRadius: "var(--rounded-sm)",
+                          color: memo.pinned
+                            ? "var(--color-primary)"
+                            : "var(--color-ink-secondary)",
+                          cursor: "pointer",
+                          padding: 0,
+                        }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M9.828 1.282a1 1 0 0 1 1.414 0l3.476 3.476a1 1 0 0 1 0 1.414L13.414 7.476l.293.293a1 1 0 0 1 0 1.414l-2.829 2.829a1 1 0 0 1-1.414 0L9.17 11.72l-3.013 3.013a.5.5 0 0 1-.707 0l-.354-.354a.5.5 0 0 1 0-.707l3.013-3.012-.293-.293a1 1 0 0 1 0-1.414l2.829-2.829a1 1 0 0 1 1.414 0l.293.293 1.304-1.304-3.476-3.476a1 1 0 0 1 0-1.414l.172-.172z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteClick(e, memo.id)}
+                        aria-label={`Delete memo: ${memo.title || "Untitled"}`}
+                        className="titlebar-no-drag"
+                        style={{
+                          width: "22px",
+                          height: "22px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "var(--color-canvas-secondary)",
+                          border: "1px solid var(--color-hairline)",
+                          borderRadius: "var(--rounded-sm)",
+                          color: "var(--color-ink-secondary)",
+                          fontSize: "14px",
+                          lineHeight: 1,
+                          cursor: "pointer",
+                          padding: 0,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "var(--color-ink-danger)";
+                          e.currentTarget.style.borderColor =
+                            "var(--color-ink-danger)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "var(--color-ink-secondary)";
+                          e.currentTarget.style.borderColor =
+                            "var(--color-hairline)";
+                        }}
+                      >
+                        x
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -415,15 +481,68 @@ export default function MemoList({ width }: MemoListProps) {
               zIndex: 10,
             }}
           >
-            <span
-              style={{
-                color: "var(--color-ink-secondary)",
-                fontSize: "13px",
-                fontWeight: 500,
-              }}
-            >
-              {selectedIds.size} selected
-            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-xs)" }}>
+              <button
+                onClick={() => {
+                  if (selectedIds.size === memos.length) {
+                    useMemoStore.setState({ selectedIds: new Set<string>() });
+                  } else {
+                    selectAll();
+                  }
+                }}
+                style={{
+                  background: "none",
+                  border: "1px solid var(--color-hairline)",
+                  borderRadius: "var(--rounded-sm)",
+                  width: "18px",
+                  height: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  padding: 0,
+                  flexShrink: 0,
+                  backgroundColor:
+                    selectedIds.size === memos.length && memos.length > 0
+                      ? "var(--color-primary)"
+                      : "transparent",
+                  borderColor:
+                    selectedIds.size === memos.length && memos.length > 0
+                      ? "var(--color-primary)"
+                      : selectedIds.size > 0
+                      ? "var(--color-primary)"
+                      : "var(--color-ink-tertiary)",
+                }}
+                aria-label={
+                  selectedIds.size === memos.length ? "Deselect all" : "Select all"
+                }
+              >
+                {selectedIds.size === memos.length && memos.length > 0 ? (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path
+                      d="M3 6L5 8L9 4"
+                      stroke="#fff"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ) : selectedIds.size > 0 ? (
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <rect x="2" y="4.5" width="6" height="1.5" rx="0.5" fill="var(--color-primary)" />
+                  </svg>
+                ) : null}
+              </button>
+              <span
+                style={{
+                  color: "var(--color-ink-secondary)",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                }}
+              >
+                {selectedIds.size} selected
+              </span>
+            </div>
             <button
               onClick={() => {
                 if (selectedIds.size > 0) {

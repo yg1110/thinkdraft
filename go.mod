@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/wailsapp/wails/v2 v2.12.0
+	github.com/yuin/goldmark v1.8.2
 	modernc.org/sqlite v1.50.1
 )
 

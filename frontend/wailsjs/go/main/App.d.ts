@@ -59,6 +59,8 @@ export function SuggestTags(arg1:string):Promise<Array<string>>;
 
 export function SyncNow():Promise<void>;
 
+export function TogglePinMemo(arg1:string):Promise<memo.Memo>;
+
 export function UpdateBlogDraft(arg1:string,arg2:any,arg3:any):Promise<ai.BlogDraft>;
 
 export function UpdateMemo(arg1:string,arg2:any,arg3:any):Promise<memo.Memo>;

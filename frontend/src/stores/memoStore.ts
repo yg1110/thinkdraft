@@ -7,6 +7,7 @@ import {
   ListMemos,
   SearchMemos,
   GetMemosByTag,
+  TogglePinMemo,
 } from "../../wailsjs/go/main/App";
 import { memo } from "../../wailsjs/go/models";
 
@@ -30,8 +31,10 @@ interface MemoStore {
   deleteMemo: (id: string) => Promise<void>;
   selectPrevMemo: () => Promise<void>;
   selectNextMemo: () => Promise<void>;
+  togglePinMemo: (id: string) => Promise<void>;
   toggleSelectMode: () => void;
   toggleSelectMemo: (id: string) => void;
+  selectAll: () => void;
   clearSelection: () => void;
 }
 
@@ -134,6 +137,16 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
     await selectMemo(memos[currentIndex + 1].id);
   },
 
+  togglePinMemo: async (id: string) => {
+    await TogglePinMemo(id);
+    await get().loadMemos();
+    const { activeId, activeMemo } = get();
+    if (activeId === id && activeMemo) {
+      const m = await GetMemo(id);
+      set({ activeMemo: m });
+    }
+  },
+
   toggleSelectMode: () => {
     const { selectMode } = get();
     if (selectMode) {
@@ -152,6 +165,11 @@ export const useMemoStore = create<MemoStore>((set, get) => ({
       next.add(id);
     }
     set({ selectedIds: next });
+  },
+
+  selectAll: () => {
+    const { memos } = get();
+    set({ selectedIds: new Set(memos.map((m) => m.id)) });
   },
 
   clearSelection: () => {

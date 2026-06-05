@@ -123,6 +123,15 @@ func (a *App) SearchMemos(query string) ([]memo.MemoSummary, error) {
 	return a.memoSvc.Search(query)
 }
 
+func (a *App) TogglePinMemo(id string) (*memo.Memo, error) {
+	m, err := a.memoSvc.TogglePin(id)
+	if err == nil && a.syncQueue != nil {
+		payload, _ := json.Marshal(m)
+		_ = a.syncQueue.Enqueue("memo", m.ID, "update", string(payload))
+	}
+	return m, err
+}
+
 // --- AI / Blog Draft Bindings (exposed to React) ---
 
 func (a *App) CheckClaudeInstalled() bool {

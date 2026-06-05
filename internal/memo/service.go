@@ -67,6 +67,18 @@ func (s *Service) List(offset, limit int) ([]MemoSummary, error) {
 	return s.repo.List(offset, limit)
 }
 
+func (s *Service) TogglePin(id string) (*Memo, error) {
+	m, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	m.Pinned = !m.Pinned
+	if err := s.repo.SetPinned(id, m.Pinned); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (s *Service) Search(query string) ([]MemoSummary, error) {
 	if query == "" {
 		return s.List(0, 50)

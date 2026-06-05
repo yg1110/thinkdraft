@@ -1,12 +1,14 @@
 package ai
 
 import (
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/oklog/ulid/v2"
+	"github.com/yuin/goldmark"
 
 	"thinkdraft/internal/memo"
 )
@@ -52,8 +54,14 @@ func (o *Organizer) GenerateBlogDraft(memoIDs []string, template string) (*BlogD
 		return nil, fmt.Errorf("claude generation failed: %w", err)
 	}
 
-	// Parse the response: first line as title, rest as content.
-	title, content := parseResponse(response)
+	// Parse the response: first line as title, rest as markdown content.
+	title, mdContent := parseResponse(response)
+
+	// Convert markdown to HTML for tiptap editor.
+	content, err := markdownToHTML(mdContent)
+	if err != nil {
+		content = mdContent // fallback to raw markdown
+	}
 
 	now := time.Now().UTC().Format(time.RFC3339)
 	draft := &BlogDraft{
@@ -108,6 +116,15 @@ func (o *Organizer) UpdateDraft(id string, title *string, content *string) (*Blo
 // DeleteDraft removes a blog draft by ID.
 func (o *Organizer) DeleteDraft(id string) error {
 	return o.repo.Delete(id)
+}
+
+// markdownToHTML converts a markdown string to HTML using goldmark.
+func markdownToHTML(md string) (string, error) {
+	var buf bytes.Buffer
+	if err := goldmark.Convert([]byte(md), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 // parseResponse extracts the title from the first line of the Claude response.

@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useCoachStore } from "../../stores/coachStore";
+import { useMemoStore } from "../../stores/memoStore";
+import { useUIStore } from "../../stores/uiStore";
 import CoachBanner from "./CoachBanner";
 
 export default function WeeklyReport() {
@@ -11,6 +13,15 @@ export default function WeeklyReport() {
     loadWeeklyReport,
     loadTopicSuggestions,
   } = useCoachStore();
+  const { openTemplateModal } = useUIStore();
+
+  const handleWriteAboutTopic = useCallback((memoIds: string[]) => {
+    useMemoStore.setState({
+      selectMode: true,
+      selectedIds: new Set(memoIds),
+    });
+    openTemplateModal();
+  }, [openTemplateModal]);
 
   useEffect(() => {
     if (weeklyReport) {
@@ -359,6 +370,15 @@ export default function WeeklyReport() {
                           </div>
                         )}
                       <button
+                        onClick={() =>
+                          handleWriteAboutTopic(
+                            suggestion.relatedMemoIds || []
+                          )
+                        }
+                        disabled={
+                          !suggestion.relatedMemoIds ||
+                          suggestion.relatedMemoIds.length === 0
+                        }
                         style={{
                           background: "var(--color-primary-muted)",
                           color: "var(--color-primary)",
@@ -367,12 +387,19 @@ export default function WeeklyReport() {
                           padding: "6px 14px",
                           fontSize: "13px",
                           fontWeight: 500,
-                          cursor: "pointer",
+                          cursor:
+                            suggestion.relatedMemoIds?.length > 0
+                              ? "pointer"
+                              : "default",
+                          opacity:
+                            suggestion.relatedMemoIds?.length > 0 ? 1 : 0.5,
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background =
-                            "var(--color-primary)";
-                          e.currentTarget.style.color = "#fff";
+                          if (suggestion.relatedMemoIds?.length > 0) {
+                            e.currentTarget.style.background =
+                              "var(--color-primary)";
+                            e.currentTarget.style.color = "#fff";
+                          }
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background =

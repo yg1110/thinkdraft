@@ -169,6 +169,7 @@ export namespace memo {
 	    id: string;
 	    title?: string;
 	    content: string;
+	    pinned: boolean;
 	    createdAt: string;
 	    updatedAt: string;
 	    deletedAt?: string;
@@ -183,6 +184,7 @@ export namespace memo {
 	        this.id = source["id"];
 	        this.title = source["title"];
 	        this.content = source["content"];
+	        this.pinned = source["pinned"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.deletedAt = source["deletedAt"];
@@ -193,6 +195,7 @@ export namespace memo {
 	    id: string;
 	    title?: string;
 	    preview: string;
+	    pinned: boolean;
 	    createdAt: string;
 	    updatedAt: string;
 	
@@ -205,6 +208,7 @@ export namespace memo {
 	        this.id = source["id"];
 	        this.title = source["title"];
 	        this.preview = source["preview"];
+	        this.pinned = source["pinned"];
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	    }

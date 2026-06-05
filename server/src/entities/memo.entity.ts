@@ -11,6 +11,9 @@ export class Memo {
   @Column({ type: 'varchar', default: '' })
   content!: string;
 
+  @Column({ type: 'integer', default: 0 })
+  pinned!: number;
+
   @Column({ type: 'varchar', name: 'created_at' })
   createdAt!: string;
 
